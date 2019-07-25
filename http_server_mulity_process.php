@@ -6,6 +6,10 @@ $index  = 0;
 $ppid = posix_getpid();
 $socket = stream_socket_server("tcp://0.0.0.0:8080", $errno, $errstr);
 while ($index<20) {
+        if(!$socket){
+             $socket = stream_socket_server("tcp://0.0.0.0:8081", $errno, $errstr);
+        }
+
         $index ++;
         $pid =  pcntl_fork();//在此处代码会裂开两部分，一个父进程，一个子进程，可以共享$index变量
         if ($pid == -1) {
@@ -31,7 +35,6 @@ while ($index<20) {
                    sleep(1);
                    echo "$errstr ($errno)<br />\n";
 
-                  exit(); // 需要退出，避免产生僵尸进程
                 } else {
                       echo '正在监听';
                       while ($conn = stream_socket_accept($socket)) {
@@ -42,5 +45,7 @@ while ($index<20) {
                                 fclose($conn);
                         }
                 }
+                
+                exit(); // 需要退出，避免产生僵尸进程
         }
 }
